@@ -1,6 +1,13 @@
 from flask import Flask, request, jsonify, render_template
+from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
 
 app = Flask(__name__)
+
+REQUEST_COUNT = Counter(
+    "todo_app_requests_total",
+    "Total number of requests to the To-Do app",
+    ["endpoint"]
+)
 
 @app.route("/health")
 def health():
@@ -21,6 +28,7 @@ def get_tasks():
 @app.route("/api/tasks", methods=["POST"])
 def create_task():
     global next_id
+    REQUEST_COUNT.labels(endpoint="/api/tasks").inc()
     data = request.get_json()
     task = {
         "id": next_id,
@@ -40,6 +48,10 @@ def update_task(task_id):
             return jsonify(task)
     return {"error": "not found"}, 404
 
+@app.route("/metrics")
+def metrics():
+    return generate_latest(), 200, {"Content-Type": CONTENT_TYPE_LATEST}
+
 @app.route("/api/tasks/<int:task_id>", methods=["DELETE"])
 def delete_task(task_id):
     global tasks
@@ -47,4 +59,4 @@ def delete_task(task_id):
     return {"result": "deleted"}, 200
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5050)
+    app.run(host="0.0.0.0", port=5050)

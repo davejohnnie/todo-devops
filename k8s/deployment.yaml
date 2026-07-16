@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-app-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: todo-app
+  template:
+    metadata:
+      labels:
+        app: todo-app
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5050"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: todo-app
+          image: davejohnnie/todo-app:latest
+          ports:
+            - containerPort: 5050
