@@ -1,0 +1,7 @@
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+#task-list .list-group-item {
+  transition: background-color 0.2s ease;
+}
